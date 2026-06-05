@@ -1,0 +1,17 @@
+{
+    "generate": true,
+    "os_info": {
+        "machine": "x86_64",
+        "version": "24.04.4",
+        "name": "Ubuntu"
+    },
+    "os_type": "Linux",
+    "wsl": false,
+    "self-os-declaration": true,
+    "gcc_or_g++_installed": true,
+    "python3_version_ok": true,
+    "coppeliasim_installed": true,
+    "meta": {
+        "evaluation_time": 0.06534743309020996
+    }
+}
