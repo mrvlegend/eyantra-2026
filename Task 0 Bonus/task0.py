@@ -113,15 +113,7 @@ def set_motor(c, left, right):
 
 
 def receive_loop(c):
-    """
-    Thread function that continuously receives sensor data from the server.
-
-    This function runs in a separate thread and parses incoming sensor data.
-    Expected data format: "S:<sensor1>,<sensor2>,<sensor3>,...\\n"
-    Example: "S:0.125,0.0,1.0,0.5\\n" represents 4 sensor values
-    """
     while c.running:
-        # Read data from socket
         try:
             data = c.sock.recv(2048)
         except OSError:
@@ -130,48 +122,36 @@ def receive_loop(c):
         if data:
             buffer = data.decode(errors="ignore")
 
-            # Check if this is sensor data (starts with "S:")
+            print("RAW:", repr(buffer))  # DEBUG
+
             if buffer.startswith("S:"):
-                values = buffer[2:]                  # Skip the "S:" prefix
-                tokens = values.split(",")           # Split by commas
+                values = buffer[2:].split('\n')[0]
+
+                tokens = values.split(",")
 
                 idx = 0
-                # Parse each sensor value
                 for token in tokens:
                     if idx >= 32:
                         break
+
                     token = token.strip()
-                    if token == "":
-                        continue
+
                     try:
                         c.sensor_values[idx] = float(token)
                         idx += 1
                     except ValueError:
-                        # atof() returns 0.0 for unparseable input
-                        c.sensor_values[idx] = 0.0
-                        idx += 1
-                c.sensor_count = idx  # Store the number of sensors received
+                        print("BAD TOKEN:", repr(token))
+                        continue
 
-        time.sleep(0.05)  # Small delay to prevent excessive CPU usage
+                c.sensor_count = idx
+
+        time.sleep(0.05)
 
 
 def control_loop(c):
-    for _ in range(4):
-
-        # forward
-        set_motor(c, 2.0, 2.0)
-        time.sleep(1.0)
-
-        # turn
-        set_motor(c, -2.0, 2.0)
-        time.sleep(0.8)
-
-    set_motor(c, 0.0, 0.0)
-
     while c.running:
+        set_motor(c, 5.0, 5.0)
         time.sleep(0.1)
-
-
 def main():
     """
     Main function - Entry point of the program.
